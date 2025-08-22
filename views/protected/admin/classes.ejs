@@ -1,0 +1,108 @@
+<%- include('../../partials/header') %>
+
+<div class="p-6">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold">All Classrooms</h2>
+    <button onclick="openClassModal()" class="bg-[#9d5b1e] text-white px-4 py-2 rounded hover:bg-[#7a441a]">
+      + Add Classroom
+    </button>
+  </div>
+
+  <!-- Classrooms Table -->
+  <div class="overflow-x-auto bg-white rounded shadow">
+    <table class="min-w-full border-collapse">
+      <thead class="bg-[#9d5b1e] text-white">
+        <tr>
+          <th class="px-4 py-2 text-left">Name</th>
+          <th class="px-4 py-2 text-left">Capacity</th>
+
+          <th class="px-4 py-2 text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (classrooms && classrooms.length > 0) { %>
+          <% classrooms.forEach(cls => { %>
+            <tr class="border-b hover:bg-gray-100">
+              <td class="px-4 py-2"><%= cls.name %></td>
+              <td class="px-4 py-2"><%= cls.capacity %></td>
+              <td class="px-4 py-2 text-center space-x-2">
+                <button onclick="openEditClassModal(<%= JSON.stringify(cls) %>)" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Edit</button>
+                <form action="/admin/del-classroom/<%= cls._id %>" method="POST" class="inline">
+                  <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="4" class="px-4 py-4 text-center text-gray-500">No classrooms found.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Classroom Modal (Add/Edit) -->
+<div id="classModal" class="fixed inset-0 bg-[#0000005d] hidden flex items-center justify-center z-50">
+  <div class="bg-white p-8 rounded-lg shadow-lg w-96 relative">
+    <h3 id="classModalTitle" class="text-2xl font-semibold text-center mb-6">Add Classroom</h3>
+
+    <form id="classForm" method="POST" class="space-y-4">
+      <div>
+        <label class="block mb-1 font-medium">Class Name</label>
+        <input type="text" name="name" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#9d5b1e]" />
+      </div>
+      <div>
+        <label class="block mb-1 font-medium">Capacity</label>
+        <input type="number" name="capacity" min="1" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#9d5b1e]" />
+      </div>
+
+      <div class="flex justify-end space-x-2">
+        <button type="button" onclick="closeClassModal()" class="px-4 py-2 rounded border">Cancel</button>
+        <button type="submit" id="classSubmitBtn" class="bg-[#9d5b1e] text-white px-4 py-2 rounded hover:bg-[#7a441a]">Save</button>
+      </div>
+
+      <div id="classLoader" class="hidden flex justify-center mt-4">
+        <div class="w-6 h-6 border-4 border-[#9d5b1e] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    </form>
+
+    <button onclick="closeClassModal()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">&times;</button>
+  </div>
+</div>
+
+<script>
+  const classModal = document.getElementById("classModal");
+  const classForm = document.getElementById("classForm");
+  const classLoader = document.getElementById("classLoader");
+  const classSubmitBtn = document.getElementById("classSubmitBtn");
+  const classModalTitle = document.getElementById("classModalTitle");
+
+  function openClassModal() {
+    classModalTitle.textContent = "Add Classroom";
+    classForm.action = "/admin/add-classroom";
+    classForm.reset();
+    classModal.classList.remove("hidden");
+  }
+
+  function openEditClassModal(cls) {
+    classModalTitle.textContent = "Edit Classroom";
+    classForm.action = "/admin/update-classroom/" + cls._id;
+    classForm.name.value = cls.name;
+    classForm.capacity.value = cls.capacity;
+    classModal.classList.remove("hidden");
+  }
+
+  function closeClassModal() {
+    classModal.classList.add("hidden");
+  }
+
+  classForm.addEventListener("submit", () => {
+    classLoader.classList.remove("hidden");
+    classSubmitBtn.disabled = true;
+    classSubmitBtn.textContent = "Saving...";
+  });
+</script>
+
+<%- include('../../partials/footer') %>

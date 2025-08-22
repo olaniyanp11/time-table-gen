@@ -1,0 +1,25 @@
+<%- include('../partials/header') %>
+
+<div class="container mx-auto px-6 py-10">
+  <h1 class="text-3xl font-bold mb-6">Welcome, <%= user.username %></h1>
+  <p class="mb-6 text-gray-600">Role: <%= user.role %> | Department: <%= user.department %> | Level: <%= user.level %></p>
+
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Results -->
+    <div class="bg-white p-6 shadow rounded-lg">
+      <h2 class="text-xl font-semibold mb-4">My Results</h2>
+      <p class="text-gray-600 mb-4">Check your academic results and GPA.</p>
+      <a href="/student/results" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">View Results</a>
+    </div>
+
+    <!-- Timetable -->
+    <div class="bg-white p-6 shadow rounded-lg">
+      <h2 class="text-xl font-semibold mb-4">My Timetable</h2>
+      <p class="text-gray-600 mb-4">View your scheduled courses and lecture times.</p>
+      <a href="/student/timetable" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">View Timetable</a>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

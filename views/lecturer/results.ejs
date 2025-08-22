@@ -1,0 +1,60 @@
+<%- include('../partials/header') %>
+
+<div class="p-6">
+  <h2 class="text-2xl font-bold mb-4">All Student Results - <%= department %></h2>
+
+  <!-- Upload CSV -->
+  <div class="mb-6 flex items-center justify-between">
+    <form action="/lecturer/results/upload" method="POST" enctype="multipart/form-data" class="flex items-center space-x-4">
+      <input type="file" name="csvFile" accept=".csv" required class="border p-2 rounded">
+      <button type="submit" class="bg-[#9d5b1e] text-white px-4 py-2 rounded hover:bg-[#7a441a]">
+        Upload CSV
+      </button>
+    </form>
+
+    <!-- Download Button -->
+    <form action="/lecturer/results/download/<%= department %>" method="GET">
+      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        Download Students CSV
+      </button>
+    </form>
+  </div>
+
+  <p class="text-sm text-gray-500 mt-2">
+    Upload CSV format: <code>studentEmail,courseCode,score</code>
+  </p>
+
+  <!-- Results Table -->
+  <div class="overflow-x-auto bg-white rounded shadow mt-6">
+    <table class="min-w-full border-collapse">
+      <thead class="bg-[#9d5b1e] text-white">
+        <tr>
+          <th class="px-4 py-2 text-left">Student</th>
+          <th class="px-4 py-2 text-left">Course</th>
+          <th class="px-4 py-2 text-left">Score</th>
+          <th class="px-4 py-2 text-left">Grade</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (results && results.length > 0) { %>
+          <% results.forEach(r => { %>
+            <tr class="border-b hover:bg-gray-100">
+              <td class="px-4 py-2"><%= r.student.name %> (<%= r.student.level %>)</td>
+              <td class="px-4 py-2"><%= r.course.code %> - <%= r.course.title %></td>
+              <td class="px-4 py-2"><%= r.score %></td>
+              <td class="px-4 py-2 font-semibold"><%= r.grade %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="4" class="px-4 py-4 text-center text-gray-500">
+              No results found.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

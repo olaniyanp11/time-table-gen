@@ -1,0 +1,174 @@
+<%- include('../../partials/header') %>
+
+<div class="flex min-h-screen bg-gray-100">
+  <!-- Sidebar -->
+<div id="sidebar" class="bg-gray-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out">
+  <h2 class="text-2xl font-bold text-center">Admin</h2>
+  <nav class="space-y-2">
+    <!-- Dashboard -->
+    <a href="/admin/dashboard" class="flex items-center px-4 py-2 hover:bg-gray-700">
+      <i class="fas fa-home mr-2"></i> Dashboard
+    </a>
+
+    <!-- Users -->
+    <a href="/admin/users" class="flex items-center px-4 py-2 hover:bg-gray-700">
+      <i class="fas fa-users mr-2"></i> Users
+    </a>
+
+    <!-- Lecturer CRUD -->
+    <div>
+      <p class="px-4 text-gray-400 uppercase text-xs mt-4">Lecturers</p>
+      <a href="/admin/lecturers" class="flex items-center px-6 py-2 hover:bg-gray-700">
+        <i class="fas fa-user-plus mr-2"></i> Add Lecturer
+      </a>
+      <a href="/admin/lecturers" class="flex items-center px-6 py-2 hover:bg-gray-700">
+        <i class="fas fa-list mr-2"></i> Manage Lecturers
+      </a>
+      <a href="/admin/lecturers/edit" class="flex items-center px-6 py-2 hover:bg-gray-700">
+        <i class="fas fa-edit mr-2"></i> Edit Lecturer
+      </a>
+      <a href="/admin/lecturers/delete" class="flex items-center px-6 py-2 hover:bg-gray-700">
+        <i class="fas fa-trash mr-2"></i> Delete Lecturer
+      </a>
+    </div>
+
+    <!-- Courses CRD -->
+    <div>
+      <p class="px-4 text-gray-400 uppercase text-xs mt-4">Courses</p>
+      <a href="/admin/courses" class="flex items-center px-6 py-2 hover:bg-gray-700">
+        <i class="fas fa-plus mr-2"></i> Add Course
+      </a>
+      <a href="/admin/courses" class="flex items-center px-6 py-2 hover:bg-gray-700">
+        <i class="fas fa-list-alt mr-2"></i> View Courses
+      </a>
+      <a href="/admin/courses/" class="flex items-center px-6 py-2 hover:bg-gray-700">
+        <i class="fas fa-trash mr-2"></i> Delete Course
+      </a>
+    </div>
+
+    <!-- Classes CRUD -->
+    <div>
+      <p class="px-4 text-gray-400 uppercase text-xs mt-4">Classes</p>
+      <a href="/admin/classrooms" class="flex items-center px-6 py-2 hover:bg-gray-700">
+        <i class="fas fa-plus-square mr-2"></i> Add Class
+      </a>
+      <a href="/admin/classes" class="flex items-center px-6 py-2 hover:bg-gray-700">
+        <i class="fas fa-list mr-2"></i> Manage Classes
+      </a>
+      <a href="/admin/classes/edit" class="flex items-center px-6 py-2 hover:bg-gray-700">
+        <i class="fas fa-edit mr-2"></i> Edit Class
+      </a>
+      <a href="/admin/classes/delete" class="flex items-center px-6 py-2 hover:bg-gray-700">
+        <i class="fas fa-trash mr-2"></i> Delete Class
+      </a>
+    </div>
+<form action="/admin/timetable" method="POST" class="mb-4">
+  <label for="department" class="mr-2 font-medium">Select Department:</label>
+  <select name="department" id="department" required class="px-2 py-1 border rounded">
+    <option value="">-- Select Department --</option>
+    <option value="Computer Science">Computer Science</option>
+    <option value="Mathematics">Mathematics</option>
+    <option value="Physics">Physics</option>
+    <!-- add other departments -->
+  </select>
+  <button type="submit" class="px-4 py-2 bg-[#9d5b1e] text-white rounded">View Timetable</button>
+</form>
+
+
+    <!-- Logout -->
+    <a href="/logout" class="flex items-center px-4 py-2 hover:bg-gray-700 mt-6">
+      <i class="fas fa-sign-out-alt mr-2"></i> Logout
+    </a>
+  </nav>
+</div>
+
+  <!-- Content -->
+  <div class="flex-1 flex flex-col">
+    <!-- Top Bar -->
+    <header class="flex justify-between items-center bg-white shadow p-4">
+      <button id="menu-btn" class="text-gray-800 md:hidden">
+        <i class="fas fa-bars text-2xl"></i>
+      </button>
+      <h1 class="text-xl font-bold">Dashboard</h1>
+      <p>Welcome, <%= user.name %></p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="p-6 overflow-y-auto">
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <div class="bg-blue-600 text-white p-6 rounded-lg shadow">
+          <h2 class="text-lg font-semibold">Total Users</h2>
+          <p class="text-2xl"><%= stats.totalUsers %></p>
+        </div>
+        <div class="bg-green-600 text-white p-6 rounded-lg shadow">
+          <h2 class="text-lg font-semibold">Lecturers</h2>
+          <p class="text-2xl"><%= stats.totalLecturers %></p>
+        </div>
+        <div class="bg-yellow-600 text-white p-6 rounded-lg shadow">
+          <h2 class="text-lg font-semibold">Students</h2>
+          <p class="text-2xl"><%= stats.totalStudents %></p>
+        </div>
+        <div class="bg-purple-600 text-white p-6 rounded-lg shadow">
+          <h2 class="text-lg font-semibold">Courses</h2>
+          <p class="text-2xl"><%= stats.totalCourses %></p>
+        </div>
+        <div class="bg-red-600 text-white p-6 rounded-lg shadow">
+          <h2 class="text-lg font-semibold">Classrooms</h2>
+          <p class="text-2xl"><%= stats.totalClassrooms %></p>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        <div class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-lg font-semibold mb-4">Users Distribution</h2>
+          <canvas id="usersChart"></canvas>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-lg font-semibold mb-4">Courses vs Classrooms</h2>
+          <canvas id="coursesChart"></canvas>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Sidebar toggle
+  $('#menu-btn').click(function() {
+    $('#sidebar').toggleClass('-translate-x-full');
+  });
+
+  // Charts
+  const ctx1 = document.getElementById('usersChart').getContext('2d');
+  new Chart(ctx1, {
+    type: 'doughnut',
+    data: {
+      labels: ['Lecturers', 'Students'],
+      datasets: [{
+        label: 'Users',
+        data: [<%= stats.totalLecturers %>, <%= stats.totalStudents %>],
+        backgroundColor: ['#16a34a', '#facc15']
+      }]
+    }
+  });
+
+  const ctx2 = document.getElementById('coursesChart').getContext('2d');
+  new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: ['Courses', 'Classrooms'],
+      datasets: [{
+        label: 'Count',
+        data: [<%= stats.totalCourses %>, <%= stats.totalClassrooms %>],
+        backgroundColor: ['#7c3aed', '#dc2626']
+      }]
+    }
+  });
+</script>
+
+<%- include('../../partials/footer') %>

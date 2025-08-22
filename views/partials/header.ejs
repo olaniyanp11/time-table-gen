@@ -1,0 +1,156 @@
+<!-- partials/header.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title || "E-Learning App" %></title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/css/output.css">
+  <!-- Add jQuery CDN before any script using $ -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+<!-- ✅ Flash Messages -->
+<% if (typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
+  <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md bg-green-500 text-white px-4 py-3 rounded shadow flex justify-between items-center mb-4" id="flash-container">
+    <span><%= success_msg %></span>
+    <button onclick="this.parentElement.remove()" class="text-white font-bold">&times;</button>
+  </div>
+<% } %>
+
+<% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
+  <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md bg-red-500 text-white px-4 py-3 rounded shadow flex justify-between items-center mb-4" id="flash-container">
+    <span><%= error_msg %></span>
+    <button onclick="this.parentElement.remove()" class="text-white font-bold">&times;</button>
+  </div>
+<% } %>
+
+<% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+  <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md bg-red-600 text-white px-4 py-3 rounded shadow mb-4"  id="flash-container">
+    <ul class="list-disc pl-5">
+      <% errors.forEach(function(error) { %>
+        <li><%= error %></li>
+      <% }); %>
+    </ul>
+    <button onclick="this.parentElement.remove()" class="text-white font-bold float-right mt-2">&times;</button>
+  </div>
+<% } %>
+<script>
+  setTimeout(() => {
+    const flash = document.getElementById('flash-container');
+    if (flash) flash.style.display = 'none';
+  }, 5000);
+</script>
+    <!-- Top Nav -->
+  <header class="relative">
+  <div class="absolute inset-0 -z-10 bg-gradient-to-br  via-white to-white"></div>
+  <nav class="mx-auto max-w-7xl px-6 lg:px-8 py-6 flex items-center justify-between">
+    
+    <!-- Logo -->
+    <a href="/" class="flex items-center gap-2">
+      <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#9d5b1e] text-white font-semibold shadow-smooth">ES</span>
+      <span class="text-xl font-semibold">EduSmart</span>
+    </a>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+      <% if (!isLoggedIn) { %>
+        <!-- Guest Links -->
+        <a href="#features" class="hover:text-[#9d5b1e]">Features</a>
+        <a href="#security" class="hover:text-[#9d5b1e]">Security</a>
+        <a href="#contact" class="hover:text-[#9d5b1e]">Contact</a>
+        <a href="/login" class="inline-flex items-center rounded-xl bg-[#9d5b1e] px-4 py-2 text-white shadow-smooth hover:bg-[#823f10] transition">Sign In</a>
+      <% } else { %>
+        <!-- Logged In User Dropdown -->
+<!-- Logged In User Dropdown -->
+<div class="relative">
+  <button id="user-menu-btn" class="inline-flex items-center gap-2 rounded-xl px-4 py-2 bg-[#9d5b1e] text-white shadow-smooth hover:bg-[#823f10] transition">
+    <i class="fa fa-user-circle"></i>
+    <span><%= user.name %> (<%= user.role %>)</span>
+    <i class="fa fa-caret-down"></i>
+  </button>
+
+  <!-- Dropdown -->
+  <div id="user-menu" class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg hidden">
+    <ul class="py-2 text-gray-700 text-sm">
+      <% if (user.role === 'admin') { %>
+        <li><a href="/admin/dashboard" class="block px-4 py-2 hover:bg-gray-100"><i class="fa fa-tachometer"></i> Dashboard</a></li>
+        <li><a href="/admin/users" class="block px-4 py-2 hover:bg-gray-100"><i class="fa fa-users"></i> Manage Users</a></li>
+        <li><a href="/admin/courses" class="block px-4 py-2 hover:bg-gray-100"><i class="fa fa-book"></i> Manage Courses</a></li>
+        <li><a href="/admin/classrooms" class="block px-4 py-2 hover:bg-gray-100"><i class="fa fa-university"></i> Manage Classrooms</a></li>
+      <% } else if (user.role === 'lecturer') { %>
+        <li><a href="/lecturer/dashboard" class="block px-4 py-2 hover:bg-gray-100"><i class="fa fa-chalkboard-teacher"></i> My Dashboard</a></li>
+        <li><a href="/lecturer/courses" class="block px-4 py-2 hover:bg-gray-100"><i class="fa fa-book-open"></i> My Courses</a></li>
+      <% } else if (user.role === 'student') { %>
+        <li><a href="/student/dashboard" class="block px-4 py-2 hover:bg-gray-100"><i class="fa fa-graduation-cap"></i> Dashboard</a></li>
+        <li><a href="/student/courses" class="block px-4 py-2 hover:bg-gray-100"><i class="fa fa-book"></i> My Courses</a></li>
+      <% } %>
+      <li><a href="/logout" class="block px-4 py-2 text-red-600 hover:bg-gray-100"><i class="fa fa-sign-out"></i> Logout</a></li>
+    </ul>
+  </div>
+</div>
+
+      <% } %>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button class="md:hidden inline-flex items-center rounded-xl border px-3 py-2 text-sm" id="mobile-menu-btn">
+      <i class="fa fa-bars"></i>
+    </button>
+  </nav>
+
+  <!-- Mobile Dropdown Menu -->
+  <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg rounded-lg mx-4 mt-2">
+    <ul class="py-2 text-gray-700 text-sm">
+      <% if (!isLoggedIn) { %>
+        <li><a href="#features" class="block px-4 py-2 hover:bg-gray-100">Features</a></li>
+        <li><a href="#security" class="block px-4 py-2 hover:bg-gray-100">Security</a></li>
+        <li><a href="#contact" class="block px-4 py-2 hover:bg-gray-100">Contact</a></li>
+        <li><a href="/login" class="block px-4 py-2 hover:bg-gray-100">Sign In</a></li>
+      <% } else { %>
+        <% if (user.role === 'admin') { %>
+          <li><a href="/admin/dashboard" class="block px-4 py-2 hover:bg-gray-100">Dashboard</a></li>
+          <li><a href="/admin/users" class="block px-4 py-2 hover:bg-gray-100">Manage Users</a></li>
+          <li><a href="/admin/courses" class="block px-4 py-2 hover:bg-gray-100">Manage Courses</a></li>
+          <li><a href="/admin/classrooms" class="block px-4 py-2 hover:bg-gray-100">Manage Classrooms</a></li>
+        <% } else if (user.role === 'lecturer') { %>
+          <li><a href="/lecturer/dashboard" class="block px-4 py-2 hover:bg-gray-100">My Dashboard</a></li>
+          <li><a href="/lecturer/courses" class="block px-4 py-2 hover:bg-gray-100">My Courses</a></li>
+        <% } else if (user.role === 'student') { %>
+          <li><a href="/student/dashboard" class="block px-4 py-2 hover:bg-gray-100">Dashboard</a></li>
+          <li><a href="/student/courses" class="block px-4 py-2 hover:bg-gray-100">My Courses</a></li>
+        <% } %>
+        <li><a href="/logout" class="block px-4 py-2 text-red-600 hover:bg-gray-100">Logout</a></li>
+      <% } %>
+    </ul>
+  </div>
+</header>
+
+<!-- jQuery for mobile menu toggle -->
+<script>
+  $("#mobile-menu-btn").on("click", function() {
+    $("#mobile-menu").toggleClass("hidden");
+  });
+</script>
+<script>
+  // Mobile menu toggle
+  $("#mobile-menu-btn").on("click", function() {
+    $("#mobile-menu").toggleClass("hidden");
+  });
+
+  // User dropdown toggle
+  $("#user-menu-btn").on("click", function(e) {
+    e.stopPropagation();
+    $("#user-menu").toggleClass("hidden");
+  });
+
+  // Close dropdown if clicking outside
+  $(document).on("click", function(e) {
+    if (!$(e.target).closest("#user-menu, #user-menu-btn").length) {
+      $("#user-menu").addClass("hidden");
+    }
+  });
+</script>

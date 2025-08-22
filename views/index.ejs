@@ -1,0 +1,124 @@
+<%- include('./partials/header') %>
+  <div class="bg-white text-slate-800">
+
+    <!-- Hero -->
+    <section class="relative overflow-hidden">
+      <!-- Decorative blobs -->
+      <div aria-hidden="true" class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-[#9d5b1e6c] blur-3xl"></div>
+      <div aria-hidden="true" class="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-[#9d5b1e6c] blur-3xl"></div>
+
+      <div class="mx-auto max-w-7xl px-6 lg:px-8 py-16 lg:py-24">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <!-- Left column: copy -->
+          <div>
+            <div class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium text-slate-600">
+              <span class="h-2 w-2 rounded-full bg-brand-600"></span>
+              Now with conflict-free scheduling
+            </div>
+            <h1 class="mt-4 text-4xl sm:text-6xl font-bold tracking-tight">
+              Simplify campus operations with
+              <span class="bg-gradient-to-r from-[#9d5b1e] to-[#e6862c] bg-clip-text text-transparent">EduSmart</span>
+            </h1>
+            <p class="mt-4 text-base sm:text-lg text-slate-600 max-w-xl">
+              An intelligent platform for class timetabling, automated results, and actionable performance insights—built for students, lecturers, and administrators.
+            </p>
+
+            <div class="mt-8 flex flex-col sm:flex-row gap-3">
+              <a href="#get-started" class="inline-flex items-center justify-center rounded-xl bg-[#9d5b1e] px-5 py-3 text-white font-medium shadow-smooth hover:bg-brand-700 transition">
+                Get Started
+              </a>
+              <a href="#features" class="inline-flex items-center justify-center rounded-xl border px-5 py-3 font-medium hover:border-[#f78e2c] hover:text-brand-700 transition">
+                See Features
+              </a>
+            </div>
+
+            <!-- Feature bullets -->
+            <ul class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-700">
+              <li class="flex items-start gap-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mt-0.5 h-5 w-5 text-brand-600"><path fill-rule="evenodd" d="M2.25 12a9.75 9.75 0 1119.5 0 9.75 9.75 0 01-19.5 0zm14.03-2.78a.75.75 0 10-1.06-1.06l-4.72 4.72-1.69-1.69a.75.75 0 10-1.06 1.06l2.22 2.22c.3.3.77.3 1.06 0l5.25-5.25z" clip-rule="evenodd"/></svg>
+                Conflict‑free class schedules
+              </li>
+              <li class="flex items-start gap-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mt-0.5 h-5 w-5 text-brand-600"><path d="M3 4.5A1.5 1.5 0 014.5 3h15A1.5 1.5 0 0121 4.5V6H3V4.5zM3 7.5h18v12A1.5 1.5 0 0119.5 21h-15A1.5 1.5 0 013 19.5v-12z"/></svg>
+                Automated results & GPA/CGPA
+              </li>
+              <li class="flex items-start gap-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mt-0.5 h-5 w-5 text-brand-600"><path d="M3 3h18v2H3zM3 7h12v2H3zM3 11h8v2H3zM3 15h6v2H3zM3 19h4v2H3z"/></svg>
+                Insightful performance analytics
+              </li>
+              <li class="flex items-start gap-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mt-0.5 h-5 w-5 text-brand-600"><path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v1.06A4.5 4.5 0 003 12v6.75A3.75 3.75 0 006.75 22.5h10.5A3.75 3.75 0 0021 18.75V12a4.5 4.5 0 00-3.75-4.19V6.75A5.25 5.25 0 0012 1.5zm0 6.75a1.5 1.5 0 011.5 1.5v.75a1.5 1.5 0 11-3 0V9.75a1.5 1.5 0 011.5-1.5z" clip-rule="evenodd"/></svg>
+                Secure, role‑based access
+              </li>
+            </ul>
+
+            <!-- Social proof / stats -->
+            <div class="mt-10 flex flex-wrap items-center gap-6 text-sm text-slate-600">
+              <div class="flex items-center gap-2"><span class="text-2xl font-bold text-slate-900">99.9%</span> uptime</div>
+              <div class="flex items-center gap-2"><span class="text-2xl font-bold text-slate-900">10x</span> faster processing</div>
+              <div class="flex items-center gap-2"><span class="text-2xl font-bold text-slate-900">5k+</span> users</div>
+            </div>
+          </div>
+
+          <!-- Right column: visual -->
+          <div class="relative">
+            <div class="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-tr from-brand-200/50 via-brand-100/40 to-transparent blur-2xl"></div>
+
+            <img src="/images/time.png" alt="">
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Features Section -->
+    <section id="features" class="bg-slate-50 py-20">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Powerful Features</h2>
+          <p class="mt-4 text-slate-600 max-w-2xl mx-auto">
+            EduSmart brings together all the tools your institution needs to manage academics effectively.
+          </p>
+        </div>
+        <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div class="rounded-xl border-white border bg-[#9d5b1e] text-white p-6 shadow-sm flex flex-col items-center">
+            <h3 class="text-lg font-semibold text-center">Conflict-Free Scheduling</h3>
+            <p class="mt-2 text-slate-100 text-sm text-center">Generate smart class timetables that respect lecturer availability and classroom capacities.</p>
+          </div>
+          <div class="rounded-xl border-white border bg-[#9d5b1e] text-white p-6 shadow-sm">
+            <h3 class="text-lg font-semibold text-center">Automated Results</h3>
+            <p class="mt-2 text-slate-100 text-sm text-center">Easily input scores and let EduSmart calculate grades, GPAs, and reports instantly.</p>
+          </div>
+          <div class="rounded-xl border-white border bg-[#9d5b1e] text-white p-6 shadow-sm">
+            <h3 class="text-lg font-semibold text-center">Performance Insights</h3>
+            <p class="mt-2 text-slate-100 text-sm text-center">Track academic trends, highlight achievers, and identify students needing help.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Call To Action Section -->
+    <section id="get-started" class="bg-[#9d5b1e] py-20 text-white">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8 text-center">
+        <h2 class="text-3xl sm:text-4xl font-bold">Ready to experience EduSmart?</h2>
+        <p class="mt-4 max-w-2xl mx-auto text-brand-100">
+          Join thousands of students, lecturers, and institutions already simplifying their academic management.
+        </p>
+        <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+          <a href="#" class="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-[#9d5b1e] font-semibold shadow-smooth hover:bg-slate-100 transition">Get Started</a>
+          <a href="#features" class="inline-flex items-center justify-center rounded-xl border border-white px-6 py-3 font-semibold hover:bg-brand-700 transition">Learn More</a>
+        </div>
+      </div>
+    </section>
+
+<section class="bg-gray-50 py-16">
+<div class="max-w-7xl mx-auto px-6 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
+<div>
+<h2 class="text-3xl font-bold text-gray-900">Personalized Learning Paths</h2>
+<p class="mt-6 text-lg text-gray-600">EduSmart adapts to your pace and style of learning, offering tailored recommendations and progress insights to help you stay on track and achieve your goals faster.</p>
+<a href="#" class="mt-6 inline-block px-6 py-3 rounded-lg bg-[#9d5b1e] text-white hover:bg-[#9d5b1e] transition">Discover More</a>
+</div>
+<div>
+<img src="/images/campus.jpeg" alt="Personalized Learning" class="rounded-2xl shadow-lg" />
+</div>
+</div>
+</section>
+</div>
+
+
+<%- include('./partials/footer') %>

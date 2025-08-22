@@ -1,0 +1,150 @@
+<%- include('../../partials/header') %>
+
+<div class="p-6">
+<form action="/admin/generate-timetable" method="POST" class="flex items-center mb-4 text-gray-800">
+  <label for="department" class="mr-2 font-medium">Select Department:</label>
+  <select name="department" id="department" required class="px-2 py-1 border rounded text-gray-900">
+    <option value="">-- Select Department --</option>
+    <option value="Computer Science" class="text-gray-900">Computer Science</option>
+    <option value="Mathematics" class="text-gray-900">Mathematics</option>
+    <option value="Physics" class="text-gray-900">Physics</option>
+    <!-- Add more departments here -->
+  </select>
+  <button type="submit" class="ml-2 px-4 py-2 bg-[#9d5b1e] text-white rounded">Generate Timetable</button>
+</form>
+
+
+
+  <!-- Timetable Table -->
+  <div class="overflow-x-auto bg-white rounded shadow">
+    <table class="min-w-full border-collapse">
+      <thead class="bg-[#9d5b1e] text-white">
+        <tr>
+          <th class="px-4 py-2">Time</th>
+          <th class="px-4 py-2">Monday</th>
+          <th class="px-4 py-2">Tuesday</th>
+          <th class="px-4 py-2">Wednesday</th>
+          <th class="px-4 py-2">Thursday</th>
+          <th class="px-4 py-2">Friday</th>
+        </tr>
+      </thead>
+      <tbody>
+<% const times = ['08:00 - 10:00','10:00 - 12:00','12:00 - 14:00','14:00 - 16:00']; %>
+<% times.forEach(time => { %>
+  <tr>
+    <td><%= time %></td>
+    <% days.forEach(day => { %>
+      <% const slot = schedules.find(s => s.day === day && s.time === time); %>
+      <td>
+        <% if(slot) { %>
+          <%= slot.course.title %> <br>
+          <%= slot.lecturer.name %> <br>
+          <%= slot.classroom.name %>
+        <% } else { %>
+          —
+        <% } %>
+      </td>
+    <% }) %>
+  </tr>
+<% }) %>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Schedule Modal (Add/Edit) -->
+<div id="scheduleModal" class="fixed inset-0 bg-[#0000005d] hidden flex items-center justify-center z-50">
+  <div class="bg-white p-8 rounded-lg shadow-lg w-96 relative">
+    <h3 id="scheduleModalTitle" class="text-2xl font-semibold text-center mb-6">Add Schedule</h3>
+
+    <form id="scheduleForm" method="POST" class="space-y-4">
+      <div>
+        <label class="block mb-1 font-medium">Day</label>
+        <select name="day" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#9d5b1e]">
+          <option value="">Select Day</option>
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium">Time</label>
+        <select name="time" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#9d5b1e]">
+          <% times.forEach(time => { %>
+            <option value="<%= time %>"><%= time %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium">Course</label>
+        <select name="course" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#9d5b1e]">
+          <option value="">Select Course</option>
+          <% courses.forEach(c => { %>
+            <option value="<%= c._id %>"><%= c.title %> (<%= c.level.join(', ') %>)</option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium">Lecturer</label>
+        <select name="lecturer" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#9d5b1e]">
+          <option value="">Select Lecturer</option>
+          <% lecturers.forEach(l => { %>
+            <option value="<%= l._id %>"><%= l.name %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium">Classroom</label>
+        <select name="classroom" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#9d5b1e]">
+          <option value="">Select Classroom</option>
+          <% classrooms.forEach(c => { %>
+            <option value="<%= c._id %>"><%= c.name %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="flex justify-end space-x-2">
+        <button type="button" onclick="closeScheduleModal()" class="px-4 py-2 rounded border">Cancel</button>
+        <button type="submit" id="scheduleSubmitBtn" class="bg-[#9d5b1e] text-white px-4 py-2 rounded hover:bg-[#7a441a]">Save</button>
+      </div>
+
+      <div id="scheduleLoader" class="hidden flex justify-center mt-4">
+        <div class="w-6 h-6 border-4 border-[#9d5b1e] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    </form>
+
+    <button onclick="closeScheduleModal()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">&times;</button>
+  </div>
+</div>
+
+<script>
+  const scheduleModal = document.getElementById("scheduleModal");
+  const scheduleForm = document.getElementById("scheduleForm");
+  const scheduleLoader = document.getElementById("scheduleLoader");
+  const scheduleSubmitBtn = document.getElementById("scheduleSubmitBtn");
+
+  function openScheduleModal() {
+    scheduleForm.reset();
+    scheduleForm.action = "/admin/schedules";
+    scheduleModal.classList.remove("hidden");
+  }
+
+  function closeScheduleModal() {
+    scheduleModal.classList.add("hidden");
+  }
+
+  scheduleForm.addEventListener("submit", () => {
+    scheduleLoader.classList.remove("hidden");
+    scheduleSubmitBtn.disabled = true;
+    scheduleSubmitBtn.textContent = "Saving...";
+  });
+</script>
+
+<%- include('../../partials/footer') %>

@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+
+<div class="p-6">
+  <h2 class="text-2xl font-bold mb-4">My Timetable</h2>
+
+  <div class="overflow-x-auto bg-white rounded shadow">
+    <table class="min-w-full border-collapse">
+      <thead class="bg-[#9d5b1e] text-white">
+        <tr>
+          <th class="px-4 py-2 text-left">Course</th>
+          <th class="px-4 py-2 text-left">Classroom</th>
+          <th class="px-4 py-2 text-left">Day</th>
+          <th class="px-4 py-2 text-left">Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (schedules && schedules.length > 0) { %>
+          <% schedules.forEach(s => { %>
+            <tr class="border-b hover:bg-gray-100">
+              <td class="px-4 py-2"><%= s.course.code %> - <%= s.course.title %></td>
+              <td class="px-4 py-2"><%= s.classroom.name %></td>
+              <td class="px-4 py-2"><%= s.day %></td>
+              <td class="px-4 py-2"><%= s.time %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="4" class="px-4 py-4 text-center text-gray-500">No timetable found.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,159 @@
+<%- include('../../partials/header') %>
+
+<div class="p-6">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold">All Lecturers</h2>
+    <button onclick="openModal()" class="bg-[#9d5b1e] text-white px-4 py-2 rounded hover:bg-[#7a441a]">
+      + Add Lecturer
+    </button>
+  </div>
+
+  <!-- Lecturers Table -->
+  <div class="overflow-x-auto bg-white rounded shadow">
+    <table class="min-w-full border-collapse">
+      <thead class="bg-[#9d5b1e] text-white">
+        <tr>
+          <th class="px-4 py-2 text-left">Name</th>
+          <th class="px-4 py-2 text-left">Email</th>
+          <th class="px-4 py-2 text-left">Department</th>
+          <th class="px-4 py-2 text-left">Level</th>
+          <th class="px-4 py-2 text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (lecturers && lecturers.length > 0) { %>
+          <% lecturers.forEach(lecturer => { %>
+            <tr class="border-b hover:bg-gray-100">
+              <td class="px-4 py-2"><%= lecturer.name %></td>
+              <td class="px-4 py-2"><%= lecturer.email %></td>
+              <td class="px-4 py-2"><%= lecturer.department %></td>
+              <td class="px-4 py-2"><%= lecturer.levels ? lecturer.levels.join(', ') : '—' %></td>
+              <td class="px-4 py-2 text-center space-x-2">
+                <button onclick="openEditModal(<%= JSON.stringify(lecturer) %>)" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Edit</button>
+                <form action="/admin/del-lecturers/<%= lecturer._id %>" method="POST" class="inline">
+                  <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="4" class="px-4 py-4 text-center text-gray-500">No lecturers found.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Lecturer Modal (Add/Edit) -->
+<div id="lecturerModal" class="fixed inset-0 bg-[#0000005d] hidden flex items-center justify-center z-50">
+  <div class="bg-white p-8 rounded-lg shadow-lg w-96 relative">
+    <h3 id="modalTitle" class="text-2xl font-semibold text-center mb-6">Add Lecturer</h3>
+
+    <form id="lecturerForm" method="POST" class="space-y-4">
+      <div>
+        <label class="block mb-1 font-medium">Full Name</label>
+        <input type="text" name="name" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#9d5b1e]" />
+      </div>
+      <div>
+        <label class="block mb-1 font-medium">Email</label>
+        <input type="email" name="email" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#9d5b1e]" />
+      </div>
+      <div>
+        <label class="block mb-1 font-medium">Department</label>
+        <input type="text" name="department" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#9d5b1e]" />
+      </div>
+      <div>
+        <label class="block mb-1 font-medium">Specialization</label>
+        <input type="text" name="specialization" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#9d5b1e]" />
+      </div>
+      <div>
+  <label class="block mb-1 font-medium">Assigned Levels</label>
+<div>
+  <label class="block mb-1 font-medium">Assigned Levels</label>
+  <div class="flex flex-wrap gap-2">
+    <label class="inline-flex items-center">
+      <input type="checkbox" name="levels" value="ND1" class="mr-1" />
+      ND1
+    </label>
+    <label class="inline-flex items-center">
+      <input type="checkbox" name="levels" value="ND2" class="mr-1" />
+      ND2
+    </label>
+    <label class="inline-flex items-center">
+      <input type="checkbox" name="levels" value="HND1" class="mr-1" />
+      HND1
+    </label>
+    <label class="inline-flex items-center">
+      <input type="checkbox" name="levels" value="HND2" class="mr-1" />
+      HND2
+    </label>
+  </div>
+</div>
+
+</div>
+
+      <div>
+        <label class="block mb-1 font-medium">Password</label>
+        <input type="password" name="password" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#9d5b1e]" />
+        <small class="text-gray-500">Leave blank to keep current password</small>
+      </div>
+
+      <div class="flex justify-end space-x-2">
+        <button type="button" onclick="closeModal()" class="px-4 py-2 rounded border">Cancel</button>
+        <button type="submit" id="submitBtn" class="bg-[#9d5b1e] text-white px-4 py-2 rounded hover:bg-[#7a441a]">
+          Save
+        </button>
+      </div>
+
+      <div id="loader" class="hidden flex justify-center mt-4">
+        <div class="w-6 h-6 border-4 border-[#9d5b1e] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    </form>
+
+    <button onclick="closeModal()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">&times;</button>
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById("lecturerModal");
+  const form = document.getElementById("lecturerForm");
+  const loader = document.getElementById("loader");
+  const submitBtn = document.getElementById("submitBtn");
+  const modalTitle = document.getElementById("modalTitle");
+
+  function openModal() {
+    modalTitle.textContent = "Add Lecturer";
+    form.action = "/admin/add-lecturer";
+    form.reset();
+    modal.classList.remove("hidden");
+  }
+
+  function openEditModal(lecturer) {
+    modalTitle.textContent = "Edit Lecturer";
+    form.action = "/admin/update-lecturer/" + lecturer._id;
+    form.name.value = lecturer.name;
+    form.email.value = lecturer.email;
+    form.department.value = lecturer.department;
+    form.specialization.value = lecturer.specialization;
+    modal.classList.remove("hidden");
+  }
+
+function closeModal() {
+  form.reset();
+  loader.classList.add("hidden");
+  submitBtn.disabled = false;
+  submitBtn.textContent = "Save";
+  modal.classList.add("hidden");
+}
+
+
+  form.addEventListener("submit", () => {
+    loader.classList.remove("hidden");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Saving...";
+  });
+</script>
+
+<%- include('../../partials/footer') %>
