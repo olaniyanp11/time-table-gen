@@ -3,20 +3,15 @@
 <div class="p-6">
   <h2 class="text-2xl font-bold mb-4">All Student Results - <%= department %></h2>
 
-  <!-- Upload CSV -->
+  <!-- Upload + Download -->
   <div class="mb-6 flex items-center justify-between">
     <form action="/lecturer/results/upload" method="POST" enctype="multipart/form-data" class="flex items-center space-x-4">
       <input type="file" name="csvFile" accept=".csv" required class="border p-2 rounded">
-      <button type="submit" class="bg-[#9d5b1e] text-white px-4 py-2 rounded hover:bg-[#7a441a]">
-        Upload CSV
-      </button>
+      <button type="submit" class="bg-[#9d5b1e] text-white px-4 py-2 rounded hover:bg-[#7a441a]">Upload CSV</button>
     </form>
 
-    <!-- Download Button -->
     <form action="/lecturer/results/download/<%= department %>" method="GET">
-      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-        Download Students CSV
-      </button>
+      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Download Students Results</button>
     </form>
   </div>
 
@@ -47,14 +42,68 @@
           <% }) %>
         <% } else { %>
           <tr>
-            <td colspan="4" class="px-4 py-4 text-center text-gray-500">
-              No results found.
-            </td>
+            <td colspan="4" class="px-4 py-4 text-center text-gray-500">No results found.</td>
           </tr>
         <% } %>
       </tbody>
     </table>
   </div>
+
+  <!-- Analysis Section -->
+  <div class="mt-6 p-4 bg-gray-50 rounded shadow">
+    <h3 class="text-lg font-bold mb-3">Results Analysis</h3>
+
+    <!-- Pie Chart -->
+    <div class="max-w-xs mx-auto">
+      <canvas id="resultsChart"></canvas>
+    </div>
+
+    <div class="mt-4 grid grid-cols-2 gap-4">
+      <!-- Passed Students -->
+      <div>
+        <h4 class="font-semibold text-green-600 mb-1 text-sm">✅ Passed (<%= summary.passed %>)</h4>
+        <ul class="text-xs space-y-1">
+          <% passedStudents.forEach(s => { %>
+            <li><%= s.student.name %> - <%= s.student.matricNumber %> (<%= s.score %>)</li>
+          <% }) %>
+        </ul>
+      </div>
+
+      <!-- Failed Students -->
+      <div>
+        <h4 class="font-semibold text-red-600 mb-1 text-sm">❌ Failed (<%= summary.failed %>)</h4>
+        <ul class="text-xs space-y-1">
+          <% failedStudents.forEach(s => { %>
+            <li><%= s.student.name %> - <%= s.student.matricNumber %> (<%= s.score %>)</li>
+          <% }) %>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Download Analysis -->
+    <form action="/lecturer/results/analysis/<%= department %>" method="GET" class="mt-4">
+      <button type="submit" class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 text-sm">
+        Download Analysis
+      </button>
+    </form>
+  </div>
+
 </div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById("resultsChart").getContext("2d");
+  new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels: ["Passed", "Failed"],
+      datasets: [{
+        data: [<%= summary.passed %>, <%= summary.failed %>],
+        backgroundColor: ["#16a34a", "#dc2626"]
+      }]
+    }
+  });
+</script>
 
 <%- include('../partials/footer') %>

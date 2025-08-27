@@ -29,20 +29,19 @@ const csv = require("csv-parser");
 const fs = require("fs");
 const { log } = require("console");
 
+// Download results for a department
 router.get("/results/download/:department", authenticateToken, getUser, isLecturer, async (req, res) => {
   try {
     const { department } = req.params;
 
-    // Pull results for this department
     const results = await Result.find()
       .populate({
         path: "student",
-        match: { role: "student", department }, // filter students by dept
-        select: "name email level department"
+        match: { role: "student", department },
+        select: "name matricNumber level department"
       })
       .populate("course", "code title");
 
-    // Filter out null students (because of match)
     const filtered = results.filter(r => r.student);
 
     if (!filtered.length) {
@@ -50,10 +49,9 @@ router.get("/results/download/:department", authenticateToken, getUser, isLectur
       return res.redirect("/lecturer/results");
     }
 
-    // Flatten into CSV-friendly objects
     const data = filtered.map(r => ({
       name: r.student.name,
-      email: r.student.email,
+      matricNumber: r.student.matricNumber,
       level: r.student.level,
       department: r.student.department,
       course: `${r.course.code} - ${r.course.title}`,
@@ -61,7 +59,7 @@ router.get("/results/download/:department", authenticateToken, getUser, isLectur
       grade: r.grade
     }));
 
-    const fields = ["name", "email", "level", "department", "course", "score", "grade"];
+    const fields = ["name", "matricNumber", "level", "department", "course", "score", "grade"];
     const parser = new Parser({ fields });
     const csv = parser.parse(data);
 
@@ -74,10 +72,74 @@ router.get("/results/download/:department", authenticateToken, getUser, isLectur
     res.redirect("/lecturer/results");
   }
 });
+router.get("/results/analysis/:department", authenticateToken, getUser, isLecturer, async (req, res) => {
+  try {
+    const { department } = req.params;
 
-/**
- * Upload filled student file (CSV/Excel)
- */
+    const results = await Result.find()
+      .populate({
+        path: "student",
+        match: { role: "student", department },
+        select: "name matricNumber level department"
+      })
+      .populate("course", "code title");
+
+    const filtered = results.filter(r => r.student);
+
+    if (!filtered.length) {
+      req.flash("error", "No results found for this department.");
+      return res.redirect("/lecturer/results");
+    }
+
+    // ✅ Define pass mark (you can change this if needed)
+    const PASS_MARK = 40;
+
+    const passes = filtered.filter(r => r.score >= PASS_MARK);
+    const fails = filtered.filter(r => r.score < PASS_MARK);
+
+    // ✅ Format student details for CSV
+    const formatData = arr =>
+      arr.map(r => ({
+        name: r.student.name,
+        matricNumber: r.student.matricNumber,
+        level: r.student.level,
+        department: r.student.department,
+        course: `${r.course.code} - ${r.course.title}`,
+        score: r.score,
+        grade: r.grade
+      }));
+
+    const data = {
+      summary: {
+        total: filtered.length,
+        passed: passes.length,
+        failed: fails.length
+      },
+      passedStudents: formatData(passes),
+      failedStudents: formatData(fails)
+    };
+
+    // ✅ If you want CSV download instead of JSON:
+    const fields = ["name", "matricNumber", "level", "department", "course", "score", "grade"];
+    const parser = new Parser({ fields });
+    const csvPassed = parser.parse(data.passedStudents);
+    const csvFailed = parser.parse(data.failedStudents);
+
+    res.header("Content-Type", "text/csv");
+    res.attachment(`${department}_analysis.csv`);
+    res.send(`SUMMARY\nTotal: ${data.summary.total}, Passed: ${data.summary.passed}, Failed: ${data.summary.failed}\n\nPASSED STUDENTS\n${csvPassed}\n\nFAILED STUDENTS\n${csvFailed}`);
+
+    // ✅ Or just return JSON analysis
+    res.json(data);
+
+  } catch (err) {
+    console.error("Analysis error:", err);
+    req.flash("error", "Error generating analysis.");
+    res.redirect("/lecturer/results");
+  }
+});
+
+// Upload filled student file (CSV/Excel)
 router.post("/upload", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).send("No file uploaded");
@@ -86,11 +148,10 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     const sheetName = workbook.SheetNames[0];
     const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-    // Save each student to DB
     const inserted = await User.insertMany(
       data.map((d) => ({
         name: d.name,
-        email: d.email,
+        matricNumber: d.matricNumber,   // <-- changed
         department: d.department,
         role: "student",
       })),
@@ -108,100 +169,72 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 });
 
 // Bulk upload results
-router.post( "/results/upload",authenticateToken,getUser,isLecturer,upload.single("csvFile"),async (req, res) => {
-    try {
-      if (!req.file) {
-        req.flash("error", "No file uploaded.");
-        return res.redirect("/lecturer/results");
-      }
-
-      const filePath = req.file.path;
-
-      // Parse CSV
-      const rows = await new Promise((resolve, reject) => {
-        const data = [];
-        fs.createReadStream(filePath)
-          .pipe(csv())
-          .on("data", (row) => data.push(row))
-          .on("end", () => resolve(data))
-          .on("error", reject);
-      });
-      let successCount = 0;
-      let skipped = [];
-      console.log(rows);
-
-      for (const row of rows) {
-        const email = row.email || row.Email;
-        const score = row.scores || row.score || row.Score;
-
-        if (!email || !score) {
-          skipped.push(row);
-          continue;
-        }
-
-        const student = await User.findOne({
-          email,
-          role: "student",
-        });
-
-        // If your CSV includes courseCode, use that
-        // Otherwise, require selecting course from form (req.body.courseId)
-       
-for (const row of rows) {
-  const email = row.email || row.Email;
-  const score = row.scores || row.score || row.Score;
-  const courseField = row.course || row.Course; // CSV has "course"
-
-  if (!email || !score || !courseField) {
-    skipped.push(row);
-    continue;
-  }
-
-  const student = await User.findOne({ email, role: "student" });
-
-  // Extract "CSC201" from "CSC201 - Data Structures"
-  const courseCode = courseField.split(" - ")[0].trim();
-  const course = await Course.findOne({
-    code: courseCode,
-    lecturer: req.user._id,
-  });
-
-  if (!student || !course) {
-    skipped.push(row);
-    continue;
-  }
-
-  const grade = getGrade(Number(score));
-
-  await Result.findOneAndUpdate(
-    { student: student._id, course: course._id },
-    { score: Number(score), grade },
-    { upsert: true, new: true }
-  );
-
-  successCount++;
-}
-
-      }
-
-      fs.unlinkSync(filePath);
-
-      if (skipped.length > 0) {
-        req.flash(
-          "warning",
-          `Uploaded ${successCount} results, but skipped ${skipped.length} rows (invalid or missing student/course).`
-        );
-      } else {
-        req.flash("success", `Uploaded ${successCount} results successfully.`);
-      }
-      return res.redirect("/lecturer/results");
-    } catch (err) {
-      console.error("Bulk upload error:", err);
-      req.flash("error", "Error processing CSV.");
+router.post("/results/upload", authenticateToken, getUser, isLecturer, upload.single("csvFile"), async (req, res) => {
+  try {
+    if (!req.file) {
+      req.flash("error", "No file uploaded.");
       return res.redirect("/lecturer/results");
     }
+
+    const filePath = req.file.path;
+
+    const rows = await new Promise((resolve, reject) => {
+      const data = [];
+      fs.createReadStream(filePath)
+        .pipe(csv())
+        .on("data", (row) => data.push(row))
+        .on("end", () => resolve(data))
+        .on("error", reject);
+    });
+
+    let successCount = 0;
+    let skipped = [];
+
+    for (const row of rows) {
+      const matricNumber = row.matricNumber || row.MatricNumber;
+      const score = row.scores || row.score || row.Score;
+      const courseField = row.course || row.Course;
+
+      if (!matricNumber || !score || !courseField) {
+        skipped.push(row);
+        continue;
+      }
+
+      const student = await User.findOne({ matricNumber, role: "student" });
+      const courseCode = courseField.split(" - ")[0].trim();
+      const course = await Course.findOne({ code: courseCode, lecturer: req.user._id });
+
+      if (!student || !course) {
+        skipped.push(row);
+        continue;
+      }
+
+      const grade = getGrade(Number(score));
+
+      await Result.findOneAndUpdate(
+        { student: student._id, course: course._id },
+        { score: Number(score), grade },
+        { upsert: true, new: true }
+      );
+
+      successCount++;
+    }
+
+    fs.unlinkSync(filePath);
+
+    if (skipped.length > 0) {
+      req.flash("warning", `Uploaded ${successCount} results, but skipped ${skipped.length} rows.`);
+    } else {
+      req.flash("success", `Uploaded ${successCount} results successfully.`);
+    }
+
+    res.redirect("/lecturer/results");
+  } catch (err) {
+    console.error("Bulk upload error:", err);
+    req.flash("error", "Error processing CSV.");
+    res.redirect("/lecturer/results");
   }
-);
+});
 
 // View lecturer's courses
 router.get(
@@ -380,13 +413,17 @@ router.get(
         department: lecturer.department,
       });
 
-      // Extract student IDs
       const studentIds = students.map((s) => s._id);
 
-      // Fetch results for those students
+      // Fetch results
       const results = await Result.find({ student: { $in: studentIds } })
         .populate("student")
         .populate("course");
+
+      // --- ✅ Analysis ---
+      const PASS_MARK = 40;
+      const passes = results.filter(r => r.score >= PASS_MARK);
+      const fails = results.filter(r => r.score < PASS_MARK);
 
       res.render("lecturer/results", {
         results,
@@ -394,6 +431,15 @@ router.get(
         title: "Department Results",
         user: req.user,
         isLoggedIn: true,
+
+        // analysis data
+        summary: {
+          total: results.length,
+          passed: passes.length,
+          failed: fails.length
+        },
+        passedStudents: passes,
+        failedStudents: fails
       });
     } catch (err) {
       console.error(err);

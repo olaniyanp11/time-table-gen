@@ -4,6 +4,7 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const authenticateToken = require('../middlewares/checkLog');
+const Schedule = require('../models/Schedule');
 
 /* =====================================================
    ✅ Middleware: inject isLoggedIn + user into all views
@@ -44,70 +45,127 @@ router.get('/login', (req, res) => {
 
 // -------------------- Register -------------------- //
 router.post('/register', async (req, res) => {
-    const { name, email, password, role, department, level } = req.body;
+    const { name, matricNumber, password, role, department, level } = req.body;
+
     try {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            req.flash('error', 'Email already exists.');
+        // Validate required fields
+        if (!name || !matricNumber || !password) {
+            req.flash('error', 'Name, email, and password are required.');
             return res.redirect('/register');
         }
 
-        if (password.length < 6) {
-            req.flash('error', 'Password must be at least 6 characters long.');
+        // If registering student, matric number required
+        if (role === 'student' && !matricNumber) {
+            req.flash('error', 'Matric number is required for students.');
             return res.redirect('/register');
+        }
+
+        // Check if user already exists by email
+        const existingMatricNumber = await User.findOne({ matricNumber });
+        if (existingMatricNumber) {
+            req.flash('error', 'Matric number already exists.');
+            return res.redirect('/register');
+        }
+
+        // If student, check matric uniqueness
+        if (role === 'student') {
+            const existingMatric = await User.findOne({ matricNumber });
+            if (existingMatric) {
+                req.flash('error', 'Matric number already exists.');
+                return res.redirect('/register');
+            }
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Create new user
         const newUser = new User({
             name,
-            email,
-            password: hashedPassword,
-            role: role || 'student', // default role
+            matricNumber: matricNumber.toLowerCase(),
+            password: hashedPassword, // Make sure this is not being hashed again in a pre-save hook
+            role,
             department,
             level,
+            matricNumber: role === 'student' ? matricNumber : undefined,
         });
+        
         await newUser.save();
 
         req.flash('success', 'Account created successfully. Please login.');
-        res.redirect('/login');
+        return res.redirect('/login');
+
     } catch (error) {
-        console.error(error);
+        console.error('🔥 Registration error:', error);
         req.flash('error', 'An error occurred while registering.');
-        res.redirect('/register');
+        return res.redirect('/register');
     }
 });
 
-// -------------------- Login -------------------- //
+
+// -------------------- LOGIN -------------------- //
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    let { identifier, password } = req.body;
+
     try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            req.flash('error', 'Invalid email or password.');
+        if (!identifier || !password) {
+            req.flash('error', 'Both identifier and password are required.');
             return res.redirect('/login');
         }
 
+        let user;
+
+        // Normalize identifier
+        identifier = identifier.trim().toLowerCase();
+
+        // Check if it's an email (contains "@")
+        if (identifier.includes('@')) {
+            console.log("📧 Email login attempt:", identifier + password);
+            user = await User.findOne({ email: identifier });
+        } else {
+            console.log("🎓 Matric login attempt:", identifier);
+            user = await User.findOne({ matricNumber: identifier, role: 'student' });
+        }
+
+        // Check if user exists
+        if (!user) {
+            console.log("❌ No user found for:", identifier);
+            req.flash('error', 'Invalid credentials.');
+            return res.redirect('/login');
+        }
+        console.log("✅ User found:", user.email || user.matricNumber);
+        // Ensure user.password is the hashed password from DB
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
+            console.log("❌ Password mismatch for:", identifier);
             req.flash('error', 'Invalid email or password.');
             return res.redirect('/login');
         }
 
+        // Create JWT
         const token = jwt.sign(
             { userId: user._id, role: user.role },
             process.env.JWT_SECRET || 'dev_secret',
             { expiresIn: '1h' }
         );
-        res.cookie('token', token, { httpOnly: true });
 
-        req.flash('success', 'Welcome back!');
-        res.redirect('/dashboard');
+        // Save JWT in cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        });
+
+        console.log("✅ Login successful for:", user.email || user.matricNumber);
+        req.flash('success', `Welcome back, ${user.name || 'User'}!`);
+        return res.redirect('/dashboard');
+
     } catch (error) {
-        console.error(error);
+        console.error('🔥 Login error:', error);
         req.flash('error', 'An error occurred while logging in.');
-        res.redirect('/login');
+        return res.redirect('/login');
     }
 });
+
 
 // -------------------- Dashboard -------------------- //
 router.get('/dashboard', authenticateToken, async (req, res) => {
@@ -119,21 +177,21 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
             return res.redirect('/login');
         }
 
-        // 🎯 role-based dashboard
-        let dashboardView = 'protected/dashboard';
+        // 🎯 Role-based dashboard
         if (user.role === 'student') return res.redirect('student/dashboard');
         if (user.role === 'lecturer') return res.redirect('lecturer/dashboard');
         if (user.role === 'admin') return res.redirect('admin/dashboard');
+
         req.flash('error', 'Something went wrong.');
         res.redirect('/logout');
-       
     } catch (error) {
         console.error(error);
         req.flash('error', 'Something went wrong.');
         res.redirect('/login');
     }
 });
-// View timetable by department
+
+// -------------------- Timetable -------------------- //
 router.get('/timetable/:departmentId', authenticateToken, async (req, res) => {
   try {
     const { departmentId } = req.params;

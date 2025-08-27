@@ -8,7 +8,7 @@
       <thead class="bg-[#9d5b1e] text-white">
         <tr>
           <th class="px-4 py-2 text-left">Name</th>
-          <th class="px-4 py-2 text-left">Email</th>
+          <th class="px-4 py-2 text-left">Matricnumber</th>
           <th class="px-4 py-2 text-left">Level</th>
           <th class="px-4 py-2 text-center">Actions</th>
         </tr>
@@ -18,7 +18,7 @@
           <% students.forEach(student => { %>
             <tr class="border-b hover:bg-gray-100">
               <td class="px-4 py-2"><%= student.name %></td>
-              <td class="px-4 py-2"><%= student.email %></td>
+              <td class="px-4 py-2"><%= student.matricNumber %></td>
               <td class="px-4 py-2"><%= student.level %></td>
               <td class="px-4 py-2 text-center">
                 <button onclick="openScoreModal('<%= student._id %>')" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Score</button>

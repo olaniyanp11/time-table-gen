@@ -1,13 +1,12 @@
-// seed.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
-// Import your models
+// Import models
 const User = require("./models/User");
 const Course = require("./models/Course");
 const Classroom = require("./models/Classroom");
 
-const MONGO_URI = "mongodb://127.0.0.1:27017/time-table-gen"; // change if needed
+const MONGO_URI = "mongodb://127.0.0.1:27017/time-table-gen";
 
 async function seed() {
   try {
@@ -20,7 +19,7 @@ async function seed() {
     await Classroom.deleteMany({});
     console.log("Cleared old data ✅");
 
-    // Create Classrooms
+    // Classrooms
     await Classroom.insertMany([
       { name: "BA", capacity: 400 }, { name: "BH", capacity: 300 },
       { name: "BG", capacity: 250 }, { name: "BY", capacity: 350 },
@@ -29,7 +28,7 @@ async function seed() {
     ]);
     console.log("Classrooms seeded ✅");
 
-    // Create Lecturers
+    // Lecturers
     const hashedPassword = await bcrypt.hash("password123", 10);
     const lecturers = await User.insertMany([
       {
@@ -62,12 +61,13 @@ async function seed() {
     ]);
     console.log("Lecturers seeded ✅");
 
-    // Create Students
+    // Students (30 with unique matric numbers)
     const students = [];
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= 30; i++) {
+      const matricNumber = `N/CS/23/${String(i).padStart(4, "0")}`; // N/CS/23/0001
       students.push({
         name: `Student ${i}`,
-        email: `student${i}@school.com`,
+        matricNumber,
         role: "student",
         password: hashedPassword,
         department: "computer science",
@@ -75,11 +75,11 @@ async function seed() {
       });
     }
     await User.insertMany(students);
-    console.log("Students seeded ✅");
+    console.log("30 Students seeded ✅");
 
-    // Create Courses (linked with lecturers)
+    // Courses
     await Course.insertMany([
-      { code: "CSC101", title: "Introduction to computer science", department: "computer science", level: "ND1", unit: 3, lecturer: lecturers[0]._id },
+      { code: "CSC101", title: "Introduction to Computer Science", department: "computer science", level: "ND1", unit: 3, lecturer: lecturers[0]._id },
       { code: "CSC201", title: "Data Structures", department: "computer science", level: "ND2", unit: 3, lecturer: lecturers[2]._id },
       { code: "CSC301", title: "Database Systems", department: "computer science", level: "HND1", unit: 3, lecturer: lecturers[1]._id },
       { code: "CSC401", title: "Artificial Intelligence", department: "computer science", level: "HND2", unit: 3, lecturer: lecturers[0]._id },

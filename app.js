@@ -42,6 +42,7 @@ app.use((req, res, next)=>{
     res.render('404', { title: '404 Not Found' });
 })
 
+
 app.listen(3000, async () => {
     console.log('🚀 Server running on http://localhost:3000');
 
@@ -49,12 +50,11 @@ app.listen(3000, async () => {
         await mongoose.connect(process.env.dbURL);
         console.log('✅ Connected to MongoDB');
 
-        const rootEmail = process.env.ROOT_EMAIL || "admin@gmail.com";
-        const rootPassword = process.env.ROOT_PASSWORD || "admin123";
+        const rootEmail = "admin@gmail.com";
 
         const existingAdmin = await User.findOne({ email: rootEmail });
         if (!existingAdmin) {
-            const hashedPassword = await bcrypt.hash(rootPassword, 10);
+            const hashedPassword = await bcrypt.hash("admin123", 10);
 
             const rootAdmin = new User({
                 name: "Root Admin",

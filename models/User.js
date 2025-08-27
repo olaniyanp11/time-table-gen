@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -8,11 +9,15 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, "Email is required"],
-    unique: true,
     lowercase: true,
     trim: true,
-    match: [/\S+@\S+\.\S+/, "Email is invalid"]
+    match: [/\S+@\S+\.\S+/, "Email is invalid"],
+    required: function () { return this.role !== 'student'; }
+  },
+  matricNumber: {
+    type: String,
+    required: function () { return this.role === 'student'; },
+    lowercase: true
   },
   role: {
     type: String,
@@ -43,5 +48,12 @@ const userSchema = new mongoose.Schema({
     required: function() { return this.role === 'lecturer'; }
   }
 }, { timestamps: true });
+
+// Partial indexes for conditional uniqueness
+userSchema.index({ email: 1 }, { unique: true, partialFilterExpression: { role: { $ne: 'student' } } });
+userSchema.index({ matricNumber: 1 }, { unique: true, partialFilterExpression: { role: 'student' } });
+
+// Hash password before save
+
 
 module.exports = mongoose.model('User', userSchema);
